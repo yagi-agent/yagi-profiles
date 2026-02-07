@@ -1,4 +1,4 @@
-package main
+package tool
 
 import (
 	"encoding/json"
@@ -8,13 +8,7 @@ import (
 	"time"
 )
 
-type RunCommandArgs struct {
-	Command          string `json:"command"`
-	WorkingDirectory string `json:"working_directory"`
-	TimeoutSeconds   int    `json:"timeout_seconds"`
-}
-
-var tool = struct {
+var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
@@ -41,7 +35,11 @@ var tool = struct {
 		"required": ["command"]
 	}`,
 	Run: func(argsJSON string) (string, error) {
-		var args RunCommandArgs
+		var args struct {
+			Command          string `json:"command"`
+			WorkingDirectory string `json:"working_directory"`
+			TimeoutSeconds   int    `json:"timeout_seconds"`
+		}
 		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
 			return "", err
 		}
