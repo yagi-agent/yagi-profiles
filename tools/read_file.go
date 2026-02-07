@@ -1,15 +1,11 @@
-package main
+package tool
 
 import (
 	"encoding/json"
 	"os"
 )
 
-type ReadFileArgs struct {
-	Path string `json:"path"`
-}
-
-var tool = struct {
+var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
@@ -28,7 +24,9 @@ var tool = struct {
 		"required": ["path"]
 	}`,
 	Run: func(argsJSON string) (string, error) {
-		var args ReadFileArgs
+		var args struct {
+			Path string `json:"path"`
+		}
 		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
 			return "", err
 		}

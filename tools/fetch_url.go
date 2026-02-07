@@ -5,9 +5,15 @@ import (
 	"hostapi"
 )
 
-var Name = "fetch_url"
-var Description = "Fetch the content of a URL and return it as text. HTML pages are converted to plain text with links preserved."
-var Parameters = `{
+var Tool = struct {
+	Name        string
+	Description string
+	Parameters  string
+	Run         func(string) (string, error)
+}{
+	Name:        "fetch_url",
+	Description: "Fetch the content of a URL and return it as text. HTML pages are converted to plain text with links preserved.",
+	Parameters: `{
 	"type": "object",
 	"properties": {
 		"url": {
@@ -16,14 +22,14 @@ var Parameters = `{
 		}
 	},
 	"required": ["url"]
-}`
-
-func Run(args string) (string, error) {
-	var params struct {
-		URL string `json:"url"`
-	}
-	if err := json.Unmarshal([]byte(args), &params); err != nil {
-		return "", err
-	}
-	return hostapi.FetchURL(params.URL), nil
+}`,
+	Run: func(args string) (string, error) {
+		var params struct {
+			URL string `json:"url"`
+		}
+		if err := json.Unmarshal([]byte(args), &params); err != nil {
+			return "", err
+		}
+		return hostapi.FetchURL(params.URL), nil
+	},
 }

@@ -1,16 +1,11 @@
-package main
+package tool
 
 import (
 	"encoding/json"
 	"os"
 )
 
-type WriteFileArgs struct {
-	Path    string `json:"path"`
-	Content string `json:"content"`
-}
-
-var tool = struct {
+var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
@@ -33,7 +28,10 @@ var tool = struct {
 		"required": ["path", "content"]
 	}`,
 	Run: func(argsJSON string) (string, error) {
-		var args WriteFileArgs
+		var args struct {
+			Path    string `json:"path"`
+			Content string `json:"content"`
+		}
 		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
 			return "", err
 		}
