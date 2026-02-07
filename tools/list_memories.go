@@ -17,6 +17,6 @@ var Tool = struct {
 		"properties": {}
 	}`,
 	Run: func(args string) (string, error) {
-		return hostapi.ListMemory(), nil
+		return hostapi.ListMemory()
 	},
 }

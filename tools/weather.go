@@ -36,6 +36,6 @@ var Tool = struct {
 		}
 
 		url := fmt.Sprintf("https://wttr.in/%s?format=j1", args.City)
-		return hostapi.FetchURL(url), nil
+		return hostapi.FetchURL(url)
 	},
 }

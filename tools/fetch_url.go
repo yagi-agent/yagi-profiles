@@ -30,6 +30,6 @@ var Tool = struct {
 		if err := json.Unmarshal([]byte(args), &params); err != nil {
 			return "", err
 		}
-		return hostapi.FetchURL(params.URL), nil
+		return hostapi.FetchURL(params.URL)
 	},
 }

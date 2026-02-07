@@ -30,7 +30,10 @@ var Tool = struct {
 		if err := json.Unmarshal([]byte(args), &params); err != nil {
 			return "", err
 		}
-		value := hostapi.GetMemory(params.Key)
+		value, err := hostapi.GetMemory(params.Key)
+		if err != nil {
+			return "", err
+		}
 		if value == "" {
 			return "No information found for key: " + params.Key, nil
 		}

@@ -35,6 +35,6 @@ var Tool = struct {
 		if err := json.Unmarshal([]byte(args), &params); err != nil {
 			return "", err
 		}
-		return hostapi.SaveMemory(params.Key, params.Value), nil
+		return hostapi.SaveMemory(params.Key, params.Value)
 	},
 }
