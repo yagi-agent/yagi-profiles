@@ -1,19 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
-
-type SearchFilesArgs struct {
-	Directory string `json:"directory"`
-	Pattern   string `json:"pattern"`
-	Glob      string `json:"glob"`
-}
 
 var tool = struct {
 	Name        string
@@ -22,13 +15,13 @@ var tool = struct {
 	Run         func(string) string
 }{
 	Name:        "search_files",
-	Description: "Search files by glob pattern or text pattern",
+	Description: "Search for files matching a pattern (glob) or search file contents for a text pattern (grep-like). Useful for finding files and locating code.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
 			"directory": {
 				"type": "string",
-				"description": "Directory to search in"
+				"description": "Directory to search in (default: current directory)"
 			},
 			"pattern": {
 				"type": "string",
@@ -36,59 +29,80 @@ var tool = struct {
 			},
 			"glob": {
 				"type": "string",
-				"description": "Glob pattern to match file names"
+				"description": "Glob pattern to match file names (e.g., '*.go', '*.txt')"
+			},
+			"max_results": {
+				"type": "integer",
+				"description": "Maximum number of results to return (default: 50)"
 			}
-		},
-		"required": ["directory"]
+		}
 	}`,
 	Run: func(argsJSON string) string {
-		var args SearchFilesArgs
-		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		var params struct {
+			Directory  string `json:"directory"`
+			Pattern    string `json:"pattern"`
+			Glob       string `json:"glob"`
+			MaxResults int    `json:"max_results"`
+		}
+		if err := json.Unmarshal([]byte(argsJSON), &params); err != nil {
 			return "Error: " + err.Error()
 		}
-		if args.Pattern == "" && args.Glob == "" {
-			return "Error: either pattern or glob must be specified"
+		if params.Directory == "" {
+			params.Directory = "."
 		}
-		if args.Glob != "" {
-			var results []string
-			filepath.Walk(args.Directory, func(path string, info os.FileInfo, err error) error {
+		if params.MaxResults <= 0 {
+			params.MaxResults = 50
+		}
+
+		if params.Pattern == "" && params.Glob == "" {
+			return "Error: specify 'pattern' (content search) or 'glob' (filename search)"
+		}
+
+		var results []string
+		count := 0
+
+		filepath.Walk(params.Directory, func(path string, info os.FileInfo, err error) error {
+			if err != nil || count >= params.MaxResults {
+				return err
+			}
+			if info.IsDir() {
+				if strings.HasPrefix(info.Name(), ".") && path != params.Directory {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+
+			if params.Glob != "" {
+				matched, _ := filepath.Match(params.Glob, info.Name())
+				if !matched {
+					return nil
+				}
+			}
+
+			if params.Pattern != "" {
+				content, err := os.ReadFile(path)
 				if err != nil {
 					return nil
 				}
-				if info.IsDir() {
-					return nil
+				lines := strings.Split(string(content), "\n")
+				for i, line := range lines {
+					if count >= params.MaxResults {
+						break
+					}
+					if strings.Contains(line, params.Pattern) {
+						results = append(results, fmt.Sprintf("%s:%d: %s", path, i+1, strings.TrimSpace(line)))
+						count++
+					}
 				}
-				matched, _ := filepath.Match(args.Glob, info.Name())
-				if matched {
-					results = append(results, path)
-				}
-				return nil
-			})
-			return strings.Join(results, "\n")
-		}
-		var results []string
-		filepath.Walk(args.Directory, func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() {
-				return nil
-			}
-			f, err := os.Open(path)
-			if err != nil {
-				return nil
-			}
-			defer f.Close()
-			scanner := bufio.NewScanner(f)
-			lineNum := 0
-			for scanner.Scan() {
-				lineNum++
-				line := scanner.Text()
-				if strings.Contains(line, args.Pattern) {
-					results = append(results, fmt.Sprintf("%s:%d:%s", path, lineNum, line))
-				}
+			} else {
+				results = append(results, path)
+				count++
 			}
 			return nil
 		})
+
 		if len(results) == 0 {
-			return "No matches found"
+			return "No matches found."
 		}
 		return strings.Join(results, "\n")
 	},

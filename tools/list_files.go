@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -69,10 +70,10 @@ var tool = struct {
 
 func formatSize(size int64) string {
 	if size < 1024 {
-		return string(rune(size)) + "B"
+		return fmt.Sprintf("%dB", size)
 	} else if size < 1024*1024 {
-		return string(rune(size/1024)) + "KB"
+		return fmt.Sprintf("%dKB", size/1024)
 	} else {
-		return string(rune(size/(1024*1024))) + "MB"
+		return fmt.Sprintf("%dMB", size/(1024*1024))
 	}
 }

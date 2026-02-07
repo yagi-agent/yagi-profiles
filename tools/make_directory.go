@@ -5,10 +5,6 @@ import (
 	"os"
 )
 
-type MakeDirectoryArgs struct {
-	Path string `json:"path"`
-}
-
 var tool = struct {
 	Name        string
 	Description string
@@ -16,7 +12,7 @@ var tool = struct {
 	Run         func(string) string
 }{
 	Name:        "make_directory",
-	Description: "Create a directory (including parent directories)",
+	Description: "Create a directory (including parent directories if needed)",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -28,13 +24,15 @@ var tool = struct {
 		"required": ["path"]
 	}`,
 	Run: func(argsJSON string) string {
-		var args MakeDirectoryArgs
-		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		var params struct {
+			Path string `json:"path"`
+		}
+		if err := json.Unmarshal([]byte(argsJSON), &params); err != nil {
 			return "Error: " + err.Error()
 		}
-		if err := os.MkdirAll(args.Path, 0755); err != nil {
-			return "Error creating directory: " + err.Error()
+		if err := os.MkdirAll(params.Path, 0755); err != nil {
+			return "Error: " + err.Error()
 		}
-		return "Created directory: " + args.Path
+		return "Created directory: " + params.Path
 	},
 }
