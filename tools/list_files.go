@@ -16,7 +16,7 @@ var tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) string
+	Run         func(string) (string, error)
 }{
 	Name:        "list_files",
 	Description: "List files and directories in a given path",
@@ -29,10 +29,10 @@ var tool = struct {
 			}
 		}
 	}`,
-	Run: func(argsJSON string) string {
+	Run: func(argsJSON string) (string, error) {
 		var args ListFilesArgs
 		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
-			return "Error: " + err.Error()
+			return "", err
 		}
 
 		if args.Path == "" {
@@ -41,7 +41,7 @@ var tool = struct {
 
 		entries, err := os.ReadDir(args.Path)
 		if err != nil {
-			return "Error reading directory: " + err.Error()
+			return "", err
 		}
 
 		var result strings.Builder
@@ -64,7 +64,7 @@ var tool = struct {
 			result.WriteString(")\n")
 		}
 
-		return result.String()
+		return result.String(), nil
 	},
 }
 

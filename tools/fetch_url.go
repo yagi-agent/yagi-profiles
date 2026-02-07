@@ -18,12 +18,12 @@ var Parameters = `{
 	"required": ["url"]
 }`
 
-func Run(args string) string {
+func Run(args string) (string, error) {
 	var params struct {
 		URL string `json:"url"`
 	}
 	if err := json.Unmarshal([]byte(args), &params); err != nil {
-		return "Error: " + err.Error()
+		return "", err
 	}
-	return hostapi.FetchURL(params.URL)
+	return hostapi.FetchURL(params.URL), nil
 }

@@ -14,7 +14,7 @@ var tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) string
+	Run         func(string) (string, error)
 }{
 	Name:        "write_file",
 	Description: "Write content to a file. WARNING: This can overwrite existing files.",
@@ -32,16 +32,16 @@ var tool = struct {
 		},
 		"required": ["path", "content"]
 	}`,
-	Run: func(argsJSON string) string {
+	Run: func(argsJSON string) (string, error) {
 		var args WriteFileArgs
 		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
-			return "Error: " + err.Error()
+			return "", err
 		}
 
 		if err := os.WriteFile(args.Path, []byte(args.Content), 0644); err != nil {
-			return "Error writing file: " + err.Error()
+			return "", err
 		}
 
-		return "Successfully wrote to " + args.Path
+		return "Successfully wrote to " + args.Path, nil
 	},
 }

@@ -8,11 +8,17 @@ import (
 	"time"
 )
 
+type RunCommandArgs struct {
+	Command          string `json:"command"`
+	WorkingDirectory string `json:"working_directory"`
+	TimeoutSeconds   int    `json:"timeout_seconds"`
+}
+
 var tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) string
+	Run         func(string) (string, error)
 }{
 	Name:        "run_command",
 	Description: "Execute a shell command and return its output (stdout and stderr). Use this to run programs, scripts, build tools, git commands, etc.",
@@ -34,26 +40,22 @@ var tool = struct {
 		},
 		"required": ["command"]
 	}`,
-	Run: func(argsJSON string) string {
-		var params struct {
-			Command          string `json:"command"`
-			WorkingDirectory string `json:"working_directory"`
-			TimeoutSeconds   int    `json:"timeout_seconds"`
-		}
-		if err := json.Unmarshal([]byte(argsJSON), &params); err != nil {
-			return "Error: " + err.Error()
+	Run: func(argsJSON string) (string, error) {
+		var args RunCommandArgs
+		if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+			return "", err
 		}
 
-		if params.TimeoutSeconds <= 0 {
-			params.TimeoutSeconds = 30
+		if args.TimeoutSeconds <= 0 {
+			args.TimeoutSeconds = 30
 		}
-		if params.TimeoutSeconds > 120 {
-			params.TimeoutSeconds = 120
+		if args.TimeoutSeconds > 120 {
+			args.TimeoutSeconds = 120
 		}
 
-		cmd := exec.Command("sh", "-c", params.Command)
-		if params.WorkingDirectory != "" {
-			cmd.Dir = params.WorkingDirectory
+		cmd := exec.Command("sh", "-c", args.Command)
+		if args.WorkingDirectory != "" {
+			cmd.Dir = args.WorkingDirectory
 		}
 
 		done := make(chan struct{})
@@ -66,15 +68,15 @@ var tool = struct {
 
 		select {
 		case <-done:
-		case <-time.After(time.Duration(params.TimeoutSeconds) * time.Second):
+		case <-time.After(time.Duration(args.TimeoutSeconds) * time.Second):
 			cmd.Process.Kill()
-			return fmt.Sprintf("Error: command timed out after %d seconds", params.TimeoutSeconds)
+			return "", fmt.Errorf("command timed out after %d seconds", args.TimeoutSeconds)
 		}
 
 		result := strings.TrimRight(string(output), "\n")
 		if cmdErr != nil {
-			return fmt.Sprintf("Exit error: %v\n%s", cmdErr, result)
+			return result, cmdErr
 		}
-		return result
+		return result, nil
 	},
 }
