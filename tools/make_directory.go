@@ -14,15 +14,15 @@ var Tool = struct {
 	Name:        "make_directory",
 	Description: "Create a directory (including parent directories if needed)",
 	Parameters: `{
-"type": "object",
-"properties": {
-"path": {
-"type": "string",
-"description": "Path of the directory to create"
-}
-},
-"required": ["path"]
-}`,
+		"type": "object",
+		"properties": {
+			"path": {
+				"type": "string",
+				"description": "Path of the directory to create"
+			}
+		},
+		"required": ["path"]
+	}`,
 	Run: func(argsJSON string) (string, error) {
 		var args struct {
 			Path string `json:"path"`

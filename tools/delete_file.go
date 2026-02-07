@@ -15,19 +15,19 @@ var Tool = struct {
 	Name:        "delete_file",
 	Description: "Delete a file or directory. For directories, set recursive to true to delete non-empty directories.",
 	Parameters: `{
-"type": "object",
-"properties": {
-"path": {
-"type": "string",
-"description": "Path to the file or directory to delete"
-},
-"recursive": {
-"type": "boolean",
-"description": "If true, recursively delete directory and its contents (default: false)"
-}
-},
-"required": ["path"]
-}`,
+		"type": "object",
+		"properties": {
+			"path": {
+				"type": "string",
+				"description": "Path to the file or directory to delete"
+			},
+			"recursive": {
+				"type": "boolean",
+				"description": "If true, recursively delete directory and its contents (default: false)"
+			}
+		},
+		"required": ["path"]
+	}`,
 	Run: func(argsJSON string) (string, error) {
 		var args struct {
 			Path      string `json:"path"`

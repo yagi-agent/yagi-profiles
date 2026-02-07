@@ -16,23 +16,23 @@ var Tool = struct {
 	Name:        "edit_file",
 	Description: "Edit a file by replacing an exact string match with new content. The old_str must match exactly in the file. If old_str is empty, the content is appended to the file.",
 	Parameters: `{
-"type": "object",
-"properties": {
-"path": {
-"type": "string",
-"description": "Path to the file to edit"
-},
-"old_str": {
-"type": "string",
-"description": "Exact string to find and replace. If empty, new_str is appended to the file."
-},
-"new_str": {
-"type": "string",
-"description": "String to replace old_str with"
-}
-},
-"required": ["path", "new_str"]
-}`,
+		"type": "object",
+		"properties": {
+			"path": {
+				"type": "string",
+				"description": "Path to the file to edit"
+			},
+			"old_str": {
+				"type": "string",
+				"description": "Exact string to find and replace. If empty, new_str is appended to the file."
+			},
+			"new_str": {
+				"type": "string",
+				"description": "String to replace old_str with"
+			}
+		},
+		"required": ["path", "new_str"]
+	}`,
 	Run: func(argsJSON string) (string, error) {
 		var args struct {
 			Path   string `json:"path"`

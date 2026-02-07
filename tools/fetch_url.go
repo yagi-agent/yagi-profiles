@@ -14,15 +14,15 @@ var Tool = struct {
 	Name:        "fetch_url",
 	Description: "Fetch the content of a URL and return it as text. HTML pages are converted to plain text with links preserved.",
 	Parameters: `{
-	"type": "object",
-	"properties": {
-		"url": {
-			"type": "string",
-			"description": "The URL to fetch"
-		}
-	},
-	"required": ["url"]
-}`,
+		"type": "object",
+		"properties": {
+			"url": {
+				"type": "string",
+				"description": "The URL to fetch"
+			}
+		},
+		"required": ["url"]
+	}`,
 	Run: func(args string) (string, error) {
 		var params struct {
 			URL string `json:"url"`

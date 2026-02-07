@@ -16,14 +16,14 @@ var Tool = struct {
 	Name:        "list_files",
 	Description: "List files and directories in a given path",
 	Parameters: `{
-"type": "object",
-"properties": {
-"path": {
-"type": "string",
-"description": "Directory path to list (default: current directory)"
-}
-}
-}`,
+		"type": "object",
+		"properties": {
+			"path": {
+				"type": "string",
+				"description": "Directory path to list (default: current directory)"
+			}
+		}
+	}`,
 	Run: func(argsJSON string) (string, error) {
 		var args struct {
 			Path string `json:"path"`

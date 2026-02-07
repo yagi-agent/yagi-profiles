@@ -17,26 +17,26 @@ var Tool = struct {
 	Name:        "search_files",
 	Description: "Search for files matching a pattern (glob) or search file contents for a text pattern (grep-like). Useful for finding files and locating code.",
 	Parameters: `{
-"type": "object",
-"properties": {
-"directory": {
-"type": "string",
-"description": "Directory to search in (default: current directory)"
-},
-"pattern": {
-"type": "string",
-"description": "Text pattern to search for in file contents"
-},
-"glob": {
-"type": "string",
-"description": "Glob pattern to match file names (e.g., '*.go', '*.txt')"
-},
-"max_results": {
-"type": "integer",
-"description": "Maximum number of results to return (default: 50)"
-}
-}
-}`,
+		"type": "object",
+		"properties": {
+			"directory": {
+				"type": "string",
+				"description": "Directory to search in (default: current directory)"
+			},
+			"pattern": {
+				"type": "string",
+				"description": "Text pattern to search for in file contents"
+			},
+			"glob": {
+				"type": "string",
+				"description": "Glob pattern to match file names (e.g., '*.go', '*.txt')"
+			},
+			"max_results": {
+				"type": "integer",
+				"description": "Maximum number of results to return (default: 50)"
+			}
+		}
+	}`,
 	Run: func(argsJSON string) (string, error) {
 		var args struct {
 			Directory  string `json:"directory"`
