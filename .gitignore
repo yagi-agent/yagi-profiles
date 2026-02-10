@@ -1,4 +1,7 @@
 approved_plugins.json
 memory.json
-tools/nostr_timeline.go
+mcp.json
+providers.json
 sessions
+history
+tools/nostr_timeline.go
