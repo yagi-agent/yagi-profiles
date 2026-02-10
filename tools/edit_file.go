@@ -1,5 +1,7 @@
 package tool
 
+import "context"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -11,7 +13,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run func(context.Context, string) (string, error)
 }{
 	Name:        "edit_file",
 	Description: "Edit a file by replacing an exact string match with new content. The old_str must match exactly in the file. If old_str is empty, the content is appended to the file.",
@@ -33,7 +35,7 @@ var Tool = struct {
 		},
 		"required": ["path", "new_str"]
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			Path   string `json:"path"`
 			OldStr string `json:"old_str"`

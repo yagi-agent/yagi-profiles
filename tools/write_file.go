@@ -1,5 +1,7 @@
 package tool
 
+import "context"
+
 import (
 	"encoding/json"
 	"os"
@@ -9,7 +11,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run func(context.Context, string) (string, error)
 }{
 	Name:        "write_file",
 	Description: "Write content to a file. WARNING: This can overwrite existing files.",
@@ -27,7 +29,7 @@ var Tool = struct {
 		},
 		"required": ["path", "content"]
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			Path    string `json:"path"`
 			Content string `json:"content"`

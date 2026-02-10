@@ -1,5 +1,7 @@
 package tool
 
+import "context"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -12,7 +14,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run func(context.Context, string) (string, error)
 }{
 	Name:        "search_files",
 	Description: "Search for files matching a pattern (glob) or search file contents for a text pattern (grep-like). Useful for finding files and locating code.",
@@ -37,7 +39,7 @@ var Tool = struct {
 			}
 		}
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			Directory  string `json:"directory"`
 			Pattern    string `json:"pattern"`

@@ -1,5 +1,7 @@
 package tool
 
+import "context"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -10,7 +12,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run func(context.Context, string) (string, error)
 }{
 	Name:        "delete_file",
 	Description: "Delete a file or directory. For directories, set recursive to true to delete non-empty directories.",
@@ -28,7 +30,7 @@ var Tool = struct {
 		},
 		"required": ["path"]
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			Path      string `json:"path"`
 			Recursive bool   `json:"recursive"`

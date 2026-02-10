@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -13,7 +14,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run         func(context.Context, string) (string, error)
 }{
 	Name:        "glob",
 	Description: "Find files by glob pattern across a directory tree. Supports '**' for recursive matching (e.g., '**/*.go', 'src/**/*.ts', '**/*test*'). Returns matching file paths sorted by modification time (newest first).",
@@ -35,7 +36,7 @@ var Tool = struct {
 		},
 		"required": ["pattern"]
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			Pattern   string `json:"pattern"`
 			Directory string `json:"directory"`

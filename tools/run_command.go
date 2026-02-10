@@ -1,5 +1,7 @@
 package tool
 
+import "context"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -12,7 +14,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run func(context.Context, string) (string, error)
 }{
 	Name:        "run_command",
 	Description: "Execute a shell command and return its output (stdout and stderr). Use this to run programs, scripts, build tools, git commands, etc.",
@@ -34,7 +36,7 @@ var Tool = struct {
 		},
 		"required": ["command"]
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			Command          string `json:"command"`
 			WorkingDirectory string `json:"working_directory"`

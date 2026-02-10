@@ -1,5 +1,7 @@
 package tool
 
+import "context"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -10,7 +12,7 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run         func(string) (string, error)
+	Run         func(context.Context, string) (string, error)
 }{
 	Name:        "weather",
 	Description: "Get the current weather information for a specified city. Returns weather conditions, temperature, humidity, wind speed, etc.",
@@ -23,7 +25,7 @@ var Tool = struct {
 			}
 		}
 	}`,
-	Run: func(argsJSON string) (string, error) {
+	Run: func(ctx context.Context, argsJSON string) (string, error) {
 		var args struct {
 			City string `json:"city"`
 		}
@@ -36,6 +38,6 @@ var Tool = struct {
 		}
 
 		url := fmt.Sprintf("https://wttr.in/%s?format=j1", args.City)
-		return hostapi.FetchURL(url)
+		return hostapi.FetchURL(ctx, url, nil)
 	},
 }
