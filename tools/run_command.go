@@ -1,11 +1,11 @@
 package tool
 
-import "context"
-
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -53,7 +53,12 @@ var Tool = struct {
 			args.TimeoutSeconds = 120
 		}
 
-		cmd := exec.Command("sh", "-c", args.Command)
+		var cmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			cmd = exec.Command("cmd", "/c", args.Command)
+		} else {
+			cmd = exec.Command("sh", "-c", args.Command)
+		}
 		if args.WorkingDirectory != "" {
 			cmd.Dir = args.WorkingDirectory
 		}
