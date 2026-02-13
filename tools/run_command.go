@@ -14,10 +14,14 @@ var Tool = struct {
 	Name        string
 	Description string
 	Parameters  string
-	Run func(context.Context, string) (string, error)
+	Run         func(context.Context, string) (string, error)
 }{
-	Name:        "run_command",
-	Description: "Execute a shell command and return its output (stdout and stderr). Use this to run programs, scripts, build tools, git commands, etc.",
+	Name: "run_command",
+	Description: `Execute a shell command. Result is JSON with 'status' ('success'/'failure'), 'exit_code', and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content. The 'output' may contain 'Error' even when status is 'success'.
+
+	exit_code usage:
+	- 0: Success (status will be 'success')
+	- Non-zero: Various errors (status will be 'failure')`,
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -79,9 +83,27 @@ var Tool = struct {
 		}
 
 		result := strings.TrimRight(string(output), "\n")
+		exitCode := 0
 		if cmdErr != nil {
-			return result, cmdErr
+			exitCode = -1
+			if exitErr, ok := cmdErr.(*exec.ExitError); ok {
+				exitCode = exitErr.ExitCode()
+			}
 		}
-		return result, nil
+		status := "success"
+		if exitCode != 0 {
+			status = "failure"
+		}
+		res := struct {
+			Status   string `json:"status"`
+			ExitCode int    `json:"exit_code"`
+			Output   string `json:"output"`
+		}{
+			Status:   status,
+			ExitCode: exitCode,
+			Output:   result,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }
