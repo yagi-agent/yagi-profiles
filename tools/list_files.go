@@ -16,7 +16,7 @@ var Tool = struct {
 	Run func(context.Context, string) (string, error)
 }{
 	Name:        "list_files",
-	Description: "List files and directories in a given path",
+	Description: "List files and directories in a given path. Result is JSON with 'status' and 'output' fields. Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -63,7 +63,15 @@ var Tool = struct {
 			result.WriteString(")\n")
 		}
 
-		return result.String(), nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: result.String(),
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }
 

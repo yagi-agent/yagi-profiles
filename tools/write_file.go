@@ -14,7 +14,7 @@ var Tool = struct {
 	Run func(context.Context, string) (string, error)
 }{
 	Name:        "write_file",
-	Description: "Write content to a file. WARNING: This can overwrite existing files.",
+	Description: "Write content to a file. WARNING: This can overwrite existing files. Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -42,6 +42,14 @@ var Tool = struct {
 			return "", err
 		}
 
-		return "Successfully wrote to " + args.Path, nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: "Successfully wrote to " + args.Path,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }

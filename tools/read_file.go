@@ -14,7 +14,7 @@ var Tool = struct {
 	Run func(context.Context, string) (string, error)
 }{
 	Name:        "read_file",
-	Description: "Read the contents of a file",
+	Description: "Read the contents of a file. Result is JSON with 'status' and 'content' fields. Determine success/failure ONLY from 'status', NEVER from 'content'.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -38,6 +38,14 @@ var Tool = struct {
 			return "", err
 		}
 
-		return string(content), nil
+		res := struct {
+			Status  string `json:"status"`
+			Content string `json:"content"`
+		}{
+			Status:  "success",
+			Content: string(content),
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }

@@ -17,7 +17,7 @@ var Tool = struct {
 	Run         func(context.Context, string) (string, error)
 }{
 	Name:        "glob",
-	Description: "Find files by glob pattern across a directory tree. Supports '**' for recursive matching (e.g., '**/*.go', 'src/**/*.ts', '**/*test*'). Returns matching file paths sorted by modification time (newest first).",
+	Description: "Find files by glob pattern across a directory tree. Supports '**' for recursive matching (e.g., '**/*.go', 'src/**/*.ts', '**/*test*'). Returns matching file paths sorted by modification time (newest first). Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -102,18 +102,28 @@ var Tool = struct {
 			matches = matches[:args.Limit]
 		}
 
+		var output string
 		if len(matches) == 0 {
-			return "No files found", nil
-		}
-
-		var sb strings.Builder
-		for i, m := range matches {
-			if i > 0 {
-				sb.WriteByte('\n')
+			output = "No files found"
+		} else {
+			var sb strings.Builder
+			for i, m := range matches {
+				if i > 0 {
+					sb.WriteByte('\n')
+				}
+				sb.WriteString(m.path)
 			}
-			sb.WriteString(m.path)
+			output = sb.String()
 		}
-		return sb.String(), nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: output,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }
 

@@ -17,7 +17,7 @@ var Tool = struct {
 	Run         func(context.Context, string) (string, error)
 }{
 	Name:        "web_search",
-	Description: "Search the web using DuckDuckGo. Returns search results with titles, URLs, and snippets. No API key required.",
+	Description: "Search the web using DuckDuckGo. Returns search results with titles, URLs, and snippets. No API key required. Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -58,7 +58,19 @@ var Tool = struct {
 			return "", fmt.Errorf("empty response from search engine")
 		}
 
-		return parseDuckDuckGoResults(result, args.NumResults)
+		parsed, err := parseDuckDuckGoResults(result, args.NumResults)
+		if err != nil {
+			return "", err
+		}
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: parsed,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }
 

@@ -16,7 +16,7 @@ var Tool = struct {
 	Run func(context.Context, string) (string, error)
 }{
 	Name:        "edit_file",
-	Description: "Edit a file by replacing an exact string match with new content. The old_str must match exactly in the file. If old_str is empty, the content is appended to the file.",
+	Description: "Edit a file by replacing an exact string match with new content. The old_str must match exactly in the file. If old_str is empty, the content is appended to the file. Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -56,7 +56,15 @@ var Tool = struct {
 			if err := os.WriteFile(args.Path, []byte(s), 0644); err != nil {
 				return "", err
 			}
-			return "Successfully appended to " + args.Path, nil
+			res := struct {
+				Status string `json:"status"`
+				Output string `json:"output"`
+			}{
+				Status: "success",
+				Output: "Successfully appended to " + args.Path,
+			}
+			b, _ := json.Marshal(res)
+			return string(b), nil
 		}
 		count := strings.Count(s, args.OldStr)
 		if count == 0 {
@@ -69,6 +77,14 @@ var Tool = struct {
 		if err := os.WriteFile(args.Path, []byte(s), 0644); err != nil {
 			return "", err
 		}
-		return "Successfully edited " + args.Path, nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: "Successfully edited " + args.Path,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }

@@ -17,7 +17,7 @@ var Tool = struct {
 	Run func(context.Context, string) (string, error)
 }{
 	Name:        "search_files",
-	Description: "Search for files matching a pattern (glob) or search file contents for a text pattern (grep-like). Useful for finding files and locating code.",
+	Description: `Search for files matching a pattern (glob) or search file contents for a text pattern (grep-like). Useful for finding files and locating code. Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.`,
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -104,9 +104,20 @@ var Tool = struct {
 			return nil
 		})
 
+		var output string
 		if len(results) == 0 {
-			return "No matches found", nil
+			output = "No matches found"
+		} else {
+			output = strings.Join(results, "\n")
 		}
-		return strings.Join(results, "\n"), nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: output,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }

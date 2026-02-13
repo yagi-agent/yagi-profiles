@@ -15,7 +15,7 @@ var Tool = struct {
 	Run func(context.Context, string) (string, error)
 }{
 	Name:        "delete_file",
-	Description: "Delete a file or directory. For directories, set recursive to true to delete non-empty directories.",
+	Description: "Delete a file or directory. For directories, set recursive to true to delete non-empty directories. Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -55,11 +55,27 @@ var Tool = struct {
 			if err := os.RemoveAll(args.Path); err != nil {
 				return "", err
 			}
-			return "Deleted directory: " + args.Path, nil
+			res := struct {
+				Status string `json:"status"`
+				Output string `json:"output"`
+			}{
+				Status: "success",
+				Output: "Deleted directory: " + args.Path,
+			}
+			b, _ := json.Marshal(res)
+			return string(b), nil
 		}
 		if err := os.Remove(args.Path); err != nil {
 			return "", err
 		}
-		return "Deleted: " + args.Path, nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: "Deleted: " + args.Path,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }

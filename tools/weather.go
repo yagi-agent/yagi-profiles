@@ -54,7 +54,7 @@ var Tool = struct {
 	Run         func(context.Context, string) (string, error)
 }{
 	Name:        "weather",
-	Description: "Get the current weather information for a specified city. Returns weather conditions, temperature, wind speed, etc.",
+	Description: "Get the current weather information for a specified city. Returns weather conditions, temperature, wind speed, etc. Result is JSON with 'status' and 'output' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'output' content.",
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -103,12 +103,20 @@ var Tool = struct {
 			return "", fmt.Errorf("error parsing weather: %w", err)
 		}
 
-		result := fmt.Sprintf("Weather for %s (Lat: %s, Lon: %s)\nCondition: %s\nTemperature: %.1f°C\nWind Speed: %.1f km/h",
+		output := fmt.Sprintf("Weather for %s (Lat: %s, Lon: %s)\nCondition: %s\nTemperature: %.1f°C\nWind Speed: %.1f km/h",
 			args.City, lat, lon,
 			weatherCodeToDescription(weather.CurrentWeather.WeatherCode),
 			weather.CurrentWeather.Temperature,
 			weather.CurrentWeather.WindSpeed,
 		)
-		return result, nil
+		res := struct {
+			Status string `json:"status"`
+			Output string `json:"output"`
+		}{
+			Status: "success",
+			Output: output,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }

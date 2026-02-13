@@ -14,7 +14,7 @@ var Tool = struct {
 	Run         func(context.Context, string) (string, error)
 }{
 	Name:        "fetch_url",
-	Description: "Fetch the content of a URL and return it as text. HTML pages are converted to plain text with links preserved.",
+	Description: `Fetch the content of a URL and return it as text. HTML pages are converted to plain text with links preserved. Result is JSON with 'status' ('success') and 'content' fields. IMPORTANT: Determine success/failure ONLY from 'status', NEVER from 'content'.`,
 	Parameters: `{
 		"type": "object",
 		"properties": {
@@ -36,13 +36,20 @@ var Tool = struct {
 		if err != nil {
 			return "", err
 		}
+		content := body
 		if strings.Contains(body, "<html") || strings.Contains(body, "<HTML") || strings.Contains(body, "<!DOCTYPE") || strings.Contains(body, "<!doctype") {
-			text, err := hostapi.HTMLToText(ctx, body)
-			if err != nil {
-				return body, nil
+			if text, err := hostapi.HTMLToText(ctx, body); err == nil {
+				content = text
 			}
-			return text, nil
 		}
-		return body, nil
+		res := struct {
+			Status  string `json:"status"`
+			Content string `json:"content"`
+		}{
+			Status:  "success",
+			Content: content,
+		}
+		b, _ := json.Marshal(res)
+		return string(b), nil
 	},
 }
