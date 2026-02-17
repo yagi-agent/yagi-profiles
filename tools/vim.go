@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -24,11 +23,11 @@ var Tool = struct {
 			"action": {
 				"type": "string",
 				"enum": ["get_buffer", "get_cursor", "execute", "insert", "search", "replace"],
-				"description": "Action to perform"
+				"description": "Action to perform. Use 'replace' for text substitution (generates vim :%s/pattern/replacement/flags command). Use 'execute' for arbitrary vim ex-commands."
 			},
 			"args": {
 				"type": "object",
-				"description": "Arguments for the action"
+				"description": "Arguments for the action. For 'replace': {pattern, replace, range, flags}. pattern uses vim regex (e.g. '\\<word\\>' for whole word match). range defaults to '%' (whole file). flags defaults to 'g'."
 			}
 		},
 		"required": ["action"]
@@ -193,6 +192,7 @@ func handleReplace(args json.RawMessage) (string, error) {
 	var a struct {
 		Pattern string `json:"pattern"`
 		Replace string `json:"replace"`
+		Range   string `json:"range"`
 		Flags   string `json:"flags"`
 	}
 	if err := json.Unmarshal(args, &a); err != nil {
@@ -202,12 +202,17 @@ func handleReplace(args json.RawMessage) (string, error) {
 	pattern := strings.ReplaceAll(a.Pattern, "/", "\\/")
 	replace := strings.ReplaceAll(a.Replace, "/", "\\/")
 
+	rangeStr := a.Range
+	if rangeStr == "" {
+		rangeStr = "%"
+	}
+
 	flags := a.Flags
 	if flags == "" {
 		flags = "g"
 	}
 
-	cmd := fmt.Sprintf(":%s/%s/%s/%s\u000d", flags, pattern, replace, flags)
+	cmd := fmt.Sprintf(":%ss/%s/%s/%s\u000d", rangeStr, pattern, replace, flags)
 
 	res := map[string]interface{}{
 		"status":      "success",
