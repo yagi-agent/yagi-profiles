@@ -22,7 +22,7 @@ var Tool = struct {
 		"properties": {
 			"path": {
 				"type": "string",
-				"description": "Directory path to list (default: current directory)"
+				"description": "Directory path to list. Omit this field to list the current directory. Pass a real path only; never placeholder text."
 			}
 		}
 	}`,
